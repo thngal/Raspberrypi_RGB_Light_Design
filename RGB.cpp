@@ -8,10 +8,16 @@
 #define sw_3 3
 #define sw_4 4
 
+// define pwm outputs
+#define r_light 5
+#define g_light 5
+#define b_light 5
+
 
 //Global Variables
 int mode = 0;
 bool color_mode = 0;
+float cycle = 0;
 
 //I2C set up
 #define ADS7830 0x48
@@ -61,6 +67,7 @@ void Color_Mode_Switch(int gpio, int level, unsigned int i)
 //mode 1 breathing
 void Mode_1()
 {
+	
 }
 
 //mode 2 swaping
@@ -85,6 +92,11 @@ void value_check(float* const RGB, const int* handler)
 	
 }
 
+//light emition
+void light_emit(float* const RGB)
+{
+}
+
 int main()
 {
 	gpioInitialise();
@@ -103,7 +115,15 @@ int main()
 	while(I2C_init(i2c_handler[0], i2c_handler[1])>=0)
 	{
 		value_check(RGB, i2c_handler);
-		
+		switch (mode)
+		{
+			case 1:
+			case 2:
+			case 3:
+			default
+			    printf("An error occured! \n");
+			    break;
+		}
 	}
 	return 0;
 }
