@@ -65,9 +65,36 @@ void Color_Mode_Switch(int gpio, int level, unsigned int i)
 }
 
 //mode 1 breathing
-void Mode_1()
+void Mode_1(float* RGB)
 {
-	
+	if (color_mode == 0)
+	{
+		for (i=0; i<75; ++i)
+		{
+			gpioPWM(r_lights, cycle/75*255*RGB[1]);
+			gpioPWM(b_lights, cycle/75*255*RGB[]);
+			gpioPWM(g_lights, cycle/75*255*RGB[]);
+		}
+		for (i=0; i<75; ++i)
+		{
+			gpioPWM(r_lights, (149-cycle)/74*255*RGB[1]);
+			gpioPWM(b_lights, (149-cycle)/74*255*RGB[1]);
+			gpioPWM(g_lights, (149-cycle)/74*255*RGB[1]);
+		}
+	}
+	else
+	{
+		if (RGB[cycle]==0) return;
+		for (i=0; i<75; ++i)
+		{
+			gpioPWM(cycle, (149-cycle)/74*255*RGB[1]);
+		}
+		for (i=0; i<75; ++i)
+		{
+			gpioPWM(cycle, (149-cycle)/74*255*RGB[1]);
+		}
+		cycle = (cycle<7? ++cycle; 0);
+	}
 }
 
 //mode 2 swaping
@@ -92,24 +119,23 @@ void value_check(float* const RGB, const int* handler)
 	
 }
 
-//light emition
-void light_emit(float* const RGB)
-{
-}
-
 int main()
 {
 	gpioInitialise();
 	int i2c_handler[2];
 	
 	float RGB[3];
-	
-	
+
 	//initialize ISR
 	gpioSetISRFunc(sw_1, FALLING_EDGE, 0, Mode_1_Switch);
 	gpioSetISRFunc(sw_2, FALLING_EDGE, 0, Mode_2_Switch);
 	gpioSetISRFunc(sw_3, FALLING_EDGE, 0, Mode_3_Switch);
 	gpioSetISRFunc(sw_4, FALLING_EDGE, 0, Color_Mode_Switch);
+
+	//set gpio frequency
+	gpioSetPWMfrequency(r_light, 50);
+	gpioSetPWMfrequency(b_light, 50);
+	gpioSetPWMfrequency(g_light, 50);
 	
 	//main coding
 	while(I2C_init(i2c_handler[0], i2c_handler[1])>=0)
