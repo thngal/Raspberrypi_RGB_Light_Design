@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <pigpio.h>
+#include <unistd.h>
 
 
 // define pins
@@ -65,7 +66,7 @@ void Color_Mode_Switch(int gpio, int level, unsigned int i)
 }
 
 //mode 1 breathing
-void Mode_1(float* RGB)
+void Mode_1 (const float* const RGB)
 {
 	if (color_mode == 0)
 	{
@@ -74,12 +75,13 @@ void Mode_1(float* RGB)
 			gpioPWM(r_lights, cycle/75*255*RGB[1]);
 			gpioPWM(b_lights, cycle/75*255*RGB[]);
 			gpioPWM(g_lights, cycle/75*255*RGB[]);
+			delay()
 		}
 		for (i=0; i<75; ++i)
 		{
-			gpioPWM(r_lights, (149-cycle)/74*255*RGB[1]);
+			gpioPWM(r_lights, (149-cycle)/74*255*RGB[0]);
 			gpioPWM(b_lights, (149-cycle)/74*255*RGB[1]);
-			gpioPWM(g_lights, (149-cycle)/74*255*RGB[1]);
+			gpioPWM(g_lights, (149-cycle)/74*255*RGB[2]);
 		}
 	}
 	else
@@ -93,18 +95,31 @@ void Mode_1(float* RGB)
 		{
 			gpioPWM(cycle, (149-cycle)/74*255*RGB[1]);
 		}
-		cycle = (cycle<7? ++cycle; 0);
+		cycle = (cycle<7? ++cycle: 0);
 	}
 }
 
-//mode 2 swaping
+//mode 2 slowly cycling, mode 2 will be RGB as background alternatively, while another 2 strobing
 void Mode_2()
 {
 }
 
-//mode 3 normal
-void Mode_3()
+//mode 3 normal constant light
+void Mode_3(const float* const RGB)
 {
+	if (!color_mode)
+	{
+		gpioPWM(r_lights, RGB[0]*255);
+		gpioPWM(g_lights, RGB[1]*255);
+		gpioPWM(b_lights, RGB[2]*255);
+		sleep(3);
+	}
+	else
+	{
+		if(!RGB[cycle]) return;
+		gpioPWM(cycle, RGB[cycle-4]*255)
+		cycle = (cycle<7? ++cycle: 0);
+	}
 }
 
 //value check
